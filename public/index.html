@@ -7,9 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"/>
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#050210}
@@ -392,12 +392,12 @@ function VotingPage({ category, contestants, picks, onSave, onBack }) {
           <div style=${pillStyle}>${selected.length} / 3</div>
         </div>
         <div class="rank-slots">
-          ${[["245,200,66"],["200,200,200"],["205,127,50"]].map((([rgb], i) => html`
+          ${["245,200,66","200,200,200","205,127,50"].map((rgb, i) => html`
             <div key=${i} class="rank-slot" style=${slotStyle(i, rgb)}>
               <div class="rank-slot-rank">${RANK_LABELS[i]}</div>
-              <div class="rank-slot-name">${selected[i] ? selected[i].name.split(" ")[0] : "–"}</div>
+              <div class="rank-slot-name">${selected[i] ? selected[i].name.split(" ")[0] : "-"}</div>
             </div>
-          `))}
+          `)}
         </div>
       </div>
 
