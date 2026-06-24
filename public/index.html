@@ -240,7 +240,7 @@ function VotingPage({ user, onVoted }) {
                 })}
               </div>
               ${error && html`<div class="error">${error}</div>`}
-              <div style="margin-top:8px;color:#c4b5fd;font-size:13px">${selections[cat].length}/3 selected</div>
+              <div style=${{ marginTop:"8px", color:"#c4b5fd", fontSize:"13px" }}>${selections[cat].length}/3 selected</div>
               <button class="btn btn-primary"
                 disabled=${selections[cat].length !== 3 || submitting}
                 onClick=${() => submitVote(cat)}>
@@ -258,10 +258,10 @@ function DonePage() {
   return html`
     <div class="app">
       <div class="header"><h1>🎊 Votes Cast!</h1></div>
-      <div class="card" style="text-align:center">
+      <div class="card" style=${{ textAlign:"center" }}>
         <div class="confetti">🎉</div>
-        <h2 style="margin-bottom:12px">You're all done!</h2>
-        <p style="color:#c4b5fd;line-height:1.6">
+        <h2 style=${{ marginBottom:"12px" }}>You're all done!</h2>
+        <p style=${{ color:"#c4b5fd", lineHeight:"1.6" }}>
           Results will be revealed when the admin closes voting.<br/>
           Enjoy the party! 🥳
         </p>

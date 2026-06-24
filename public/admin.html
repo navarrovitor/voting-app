@@ -98,7 +98,7 @@ function LoginPage({ onLogin }) {
           <input type="password" placeholder="Admin password" value=${pw}
             onInput=${e => setPw(e.target.value)} autoFocus/>
           ${error && html`<div class="error">${error}</div>`}
-          <button class="btn btn-primary" style="margin-top:12px;width:100%" disabled=${loading}>
+          <button class="btn btn-primary" style=${{ marginTop:"12px", width:"100%" }} disabled=${loading}>
             ${loading ? "..." : "Login"}
           </button>
         </form>
@@ -203,7 +203,7 @@ function Dashboard() {
                 ${settings.voting_open ? "OPEN" : "CLOSED"}
               </span>
             </div>
-            <div style="display:flex;gap:8px">
+            <div style=${{ display:"flex", gap:"8px" }}>
               <button class="btn btn-success" disabled=${settings.voting_open}
                 onClick=${() => updateSetting("voting_open", true)}>Open Voting</button>
               <button class="btn btn-danger" disabled=${!settings.voting_open}
@@ -218,7 +218,7 @@ function Dashboard() {
                 ${settings.results_public ? "YES" : "NO"}
               </span>
             </div>
-            <div style="display:flex;gap:8px">
+            <div style=${{ display:"flex", gap:"8px" }}>
               <button class="btn btn-success" disabled=${settings.results_public}
                 onClick=${() => updateSetting("results_public", true)}>Show Results</button>
               <button class="btn btn-danger" disabled=${!settings.results_public}
@@ -232,9 +232,9 @@ function Dashboard() {
       ${tab === "results" && results && html`
         <div>
           <div class="card">
-            <div style="display:flex;gap:16px;font-size:14px;color:#94a3b8">
-              <span>Total voters: <strong style="color:#e2e8f0">${results.total_voters}</strong></span>
-              <span>Voting: <strong style=${"color:"+(results.voting_open?"#34d399":"#f87171")}>
+            <div style=${{ display:"flex", gap:"16px", fontSize:"14px", color:"#94a3b8" }}>
+              <span>Total voters: <strong style=${{ color:"#e2e8f0" }}>${results.total_voters}</strong></span>
+              <span>Voting: <strong style=${{ color: results.voting_open?"#34d399":"#f87171" }}>
                 ${results.voting_open?"Open":"Closed"}
               </strong></span>
             </div>
@@ -243,7 +243,7 @@ function Dashboard() {
             <div key=${cat} class="card">
               <h2>${cat==="singing"?"🎤 Best Singing Performance":"👗 Best Costume"}</h2>
               ${rows.length === 0
-                ? html`<p style="color:#64748b;font-size:14px">No votes yet</p>`
+                ? html`<p style=${{ color:"#64748b", fontSize:"14px" }}>No votes yet</p>`
                 : rows.map((r, i) => html`
                     <div key=${r.id} class="result-row">
                       <span class="result-rank">${medals[i]||(i+1)+"."}</span>
@@ -258,7 +258,7 @@ function Dashboard() {
         </div>
       `}
 
-      <button class="btn btn-outline" style="margin-top:8px"
+      <button class="btn btn-outline" style=${{ marginTop:"8px" }}
         onClick=${() => { localStorage.removeItem("admin_token"); window.location.reload(); }}>
         Logout
       </button>
