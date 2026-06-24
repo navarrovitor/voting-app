@@ -6,64 +6,59 @@
 <title>Admin — Party Vote</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; }
-  .app { max-width: 640px; margin: 0 auto; padding: 0 16px 60px; }
-  h1 { font-size: 24px; font-weight: 800; padding: 24px 0 20px; }
-  h2 { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
-  h3 { font-size: 14px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-  input[type="password"], input[type="text"] {
-    width: 100%; padding: 12px 14px; border-radius: 8px;
-    border: 2px solid #334155; background: #0f172a; color: #e2e8f0;
-    font-size: 15px; outline: none; transition: border-color 0.2s;
-  }
-  input:focus { border-color: #7c3aed; }
-  .btn { padding: 10px 18px; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
-  .btn-primary { background: #7c3aed; color: #fff; }
-  .btn-primary:hover { background: #6d28d9; }
-  .btn-danger { background: #dc2626; color: #fff; }
-  .btn-danger:hover { background: #b91c1c; }
-  .btn-success { background: #059669; color: #fff; }
-  .btn-success:hover { background: #047857; }
-  .btn-sm { padding: 6px 12px; font-size: 12px; }
-  .btn-outline { background: transparent; border: 1px solid #475569; color: #94a3b8; }
-  .btn-outline:hover { border-color: #7c3aed; color: #7c3aed; }
-  .row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .row:last-child { margin-bottom: 0; }
-  .contestant-name { flex: 1; font-size: 14px; font-weight: 500; }
-  .toggle-group { display: flex; gap: 6px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-  .badge-on { background: rgba(5,150,105,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.3); }
-  .badge-off { background: rgba(100,116,139,0.2); color: #64748b; border: 1px solid rgba(100,116,139,0.3); }
-  .status-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-  .status-label { font-size: 14px; flex: 1; }
-  .big-status { font-size: 28px; font-weight: 800; }
-  .open { color: #34d399; }
-  .closed { color: #f87171; }
-  .result-row { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid #1e293b; }
-  .result-row:last-child { border-bottom: none; }
-  .result-rank { font-size: 18px; width: 28px; text-align: center; }
-  .result-name { flex: 1; font-size: 14px; }
-  .result-pts { font-size: 13px; color: #a78bfa; font-weight: 700; }
-  .result-votes { font-size: 12px; color: #64748b; }
-  .add-form { display: flex; gap: 8px; margin-top: 14px; }
-  .add-form input { flex: 1; }
-  .error { color: #f87171; font-size: 13px; margin-top: 6px; }
-  .success-msg { color: #34d399; font-size: 13px; margin-top: 6px; }
-  .spinner { width: 32px; height: 32px; margin: 40px auto; border: 3px solid rgba(255,255,255,0.1); border-top-color: #7c3aed; border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-  .tab { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #334155; background: transparent; color: #64748b; font-weight: 600; cursor: pointer; font-size: 13px; }
-  .tab.active { border-color: #7c3aed; background: rgba(124,58,237,0.15); color: #a78bfa; }
-  .divider { border: none; border-top: 1px solid #334155; margin: 14px 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0}
+.app{max-width:640px;margin:0 auto;padding:0 16px 60px}
+h1{font-size:24px;font-weight:800;padding:24px 0 20px}
+h2{font-size:18px;font-weight:700;margin-bottom:14px}
+h3{font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
+input[type=password],input[type=text]{width:100%;padding:12px 14px;border-radius:8px;border:2px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;outline:none;transition:border-color 0.2s}
+input:focus{border-color:#7c3aed}
+.btn{padding:10px 18px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:#7c3aed;color:#fff}
+.btn-primary:hover{background:#6d28d9}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover:not(:disabled){background:#b91c1c}
+.btn-success{background:#059669;color:#fff}
+.btn-success:hover:not(:disabled){background:#047857}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-outline{background:transparent;border:1px solid #475569;color:#94a3b8}
+.btn-outline:hover{border-color:#7c3aed;color:#7c3aed}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.row:last-child{margin-bottom:0}
+.cname{flex:1;font-size:14px;font-weight:500}
+.tgrp{display:flex;gap:6px}
+.status-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.status-label{font-size:14px;flex:1}
+.big-status{font-size:28px;font-weight:800}
+.open{color:#34d399}
+.closed{color:#f87171}
+.result-row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #1e293b}
+.result-row:last-child{border-bottom:none}
+.result-rank{font-size:18px;width:28px;text-align:center}
+.result-name{flex:1;font-size:14px}
+.result-pts{font-size:13px;color:#a78bfa;font-weight:700}
+.result-votes{font-size:12px;color:#64748b}
+.add-form{display:flex;gap:8px;margin-top:14px}
+.add-form input{flex:1}
+.error{color:#f87171;font-size:13px;margin-top:6px}
+.ok{color:#34d399;font-size:13px;margin-top:6px}
+.spinner{width:32px;height:32px;margin:40px auto;border:3px solid rgba(255,255,255,0.1);border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:8px;margin-bottom:20px}
+.tab{flex:1;padding:10px;border-radius:8px;border:1px solid #334155;background:transparent;color:#64748b;font-weight:600;cursor:pointer;font-size:13px}
+.tab.active{border-color:#7c3aed;background:rgba(124,58,237,0.15);color:#a78bfa}
+.divider{border:none;border-top:1px solid #334155;margin:14px 0}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
+<div id="root"><div class="app"><div class="spinner" style="margin-top:80px"></div></div></div>
+<script>
+const html = htm.bind(React.createElement);
 const { useState, useEffect } = React;
 
 function api(path, opts = {}) {
@@ -95,21 +90,21 @@ function LoginPage({ onLogin }) {
     finally { setLoading(false); }
   }
 
-  return (
-    <div className="app">
+  return html`
+    <div class="app">
       <h1>🔐 Admin Login</h1>
-      <div className="card">
-        <form onSubmit={submit}>
-          <input type="password" placeholder="Admin password" value={pw}
-            onChange={e => setPw(e.target.value)} autoFocus/>
-          {error && <div className="error">{error}</div>}
-          <button className="btn btn-primary" style={{marginTop:"12px",width:"100%"}} disabled={loading}>
-            {loading ? "..." : "Login"}
+      <div class="card">
+        <form onSubmit=${submit}>
+          <input type="password" placeholder="Admin password" value=${pw}
+            onInput=${e => setPw(e.target.value)} autoFocus/>
+          ${error && html`<div class="error">${error}</div>`}
+          <button class="btn btn-primary" style="margin-top:12px;width:100%" disabled=${loading}>
+            ${loading ? "..." : "Login"}
           </button>
         </form>
       </div>
     </div>
-  );
+  `;
 }
 
 function Dashboard() {
@@ -128,13 +123,8 @@ function Dashboard() {
     setLoading(false);
   }
 
-  async function loadResults() {
-    const r = await api("/admin/results");
-    setResults(r);
-  }
-
   useEffect(() => { load(); }, []);
-  useEffect(() => { if (tab === "results") loadResults(); }, [tab]);
+  useEffect(() => { if (tab === "results") api("/admin/results").then(setResults); }, [tab]);
 
   async function addContestant() {
     if (!newName.trim()) return;
@@ -145,9 +135,7 @@ function Dashboard() {
 
   async function toggleField(id, field) {
     const c = contestants.find(x => x.id === id);
-    const updated = await api(`/admin/contestants/${id}`, {
-      method: "PATCH", body: { [field]: !c[field] }
-    });
+    const updated = await api(`/admin/contestants/${id}`, { method: "PATCH", body: { [field]: !c[field] } });
     setContestants(prev => prev.map(x => x.id === id ? updated : x));
   }
 
@@ -160,138 +148,132 @@ function Dashboard() {
   async function updateSetting(key, value) {
     await api("/admin/settings", { method: "POST", body: { [key]: value } });
     setSettings(prev => ({ ...prev, [key]: value }));
-    flash(value ? "✓ Done" : "✓ Done");
+    setMsg("✓ Saved"); setTimeout(() => setMsg(""), 2000);
   }
-
-  function flash(m) { setMsg(m); setTimeout(() => setMsg(""), 2000); }
 
   const medals = ["🥇","🥈","🥉"];
 
-  if (loading) return <div className="app"><div className="spinner"></div></div>;
+  if (loading) return html`<div class="app"><div class="spinner"></div></div>`;
 
-  return (
-    <div className="app">
+  return html`
+    <div class="app">
       <h1>🎉 Party Admin</h1>
-
-      <div className="tabs">
-        {["contestants","voting","results"].map(t => (
-          <button key={t} className={`tab ${tab===t?"active":""}`} onClick={() => setTab(t)}>
-            {t.charAt(0).toUpperCase()+t.slice(1)}
+      <div class="tabs">
+        ${["contestants","voting","results"].map(t => html`
+          <button key=${t} class=${"tab"+(tab===t?" active":"")} onClick=${() => setTab(t)}>
+            ${t.charAt(0).toUpperCase()+t.slice(1)}
           </button>
-        ))}
+        `)}
       </div>
 
-      {tab === "contestants" && (
-        <div className="card">
+      ${tab === "contestants" && html`
+        <div class="card">
           <h2>Contestants</h2>
-          <h3 style={{marginBottom:"12px"}}>Enable per category:</h3>
-          {contestants.map(c => (
-            <div key={c.id} className="row">
-              <span className="contestant-name">{c.name}</span>
-              <div className="toggle-group">
-                <button className={`btn btn-sm ${c.singing_enabled?"btn-success":"btn-outline"}`}
-                  onClick={() => toggleField(c.id, "singing_enabled")}
-                  title="Toggle Singing">🎤</button>
-                <button className={`btn btn-sm ${c.costume_enabled?"btn-success":"btn-outline"}`}
-                  onClick={() => toggleField(c.id, "costume_enabled")}
-                  title="Toggle Costume">👗</button>
-                <button className="btn btn-sm btn-danger" onClick={() => deleteContestant(c.id)}>✕</button>
+          <h3>Toggle per category (🎤 Singing | 👗 Costume)</h3>
+          ${contestants.map(c => html`
+            <div key=${c.id} class="row">
+              <span class="cname">${c.name}</span>
+              <div class="tgrp">
+                <button class=${"btn btn-sm "+(c.singing_enabled?"btn-success":"btn-outline")}
+                  onClick=${() => toggleField(c.id, "singing_enabled")}>🎤</button>
+                <button class=${"btn btn-sm "+(c.costume_enabled?"btn-success":"btn-outline")}
+                  onClick=${() => toggleField(c.id, "costume_enabled")}>👗</button>
+                <button class="btn btn-sm btn-danger" onClick=${() => deleteContestant(c.id)}>✕</button>
               </div>
             </div>
-          ))}
-          <hr className="divider"/>
+          `)}
+          <hr class="divider"/>
           <h3>Add Contestant</h3>
-          <div className="add-form">
-            <input type="text" placeholder="Name" value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onKeyDown={e => e.key==="Enter" && addContestant()}/>
-            <button className="btn btn-primary" onClick={addContestant}>Add</button>
+          <div class="add-form">
+            <input type="text" placeholder="Name" value=${newName}
+              onInput=${e => setNewName(e.target.value)}
+              onKeyDown=${e => e.key==="Enter" && addContestant()}/>
+            <button class="btn btn-primary" onClick=${addContestant}>Add</button>
           </div>
         </div>
-      )}
+      `}
 
-      {tab === "voting" && (
-        <>
-          <div className="card">
+      ${tab === "voting" && html`
+        <div>
+          <div class="card">
             <h2>Voting Status</h2>
-            <div className="status-row">
-              <span className="status-label">Status:</span>
-              <span className={`big-status ${settings.voting_open?"open":"closed"}`}>
-                {settings.voting_open ? "OPEN" : "CLOSED"}
+            <div class="status-row">
+              <span class="status-label">Status:</span>
+              <span class=${"big-status "+(settings.voting_open?"open":"closed")}>
+                ${settings.voting_open ? "OPEN" : "CLOSED"}
               </span>
             </div>
-            <div style={{display:"flex",gap:"8px"}}>
-              <button className="btn btn-success" disabled={settings.voting_open}
-                onClick={() => updateSetting("voting_open", true)}>
-                Open Voting
-              </button>
-              <button className="btn btn-danger" disabled={!settings.voting_open}
-                onClick={() => updateSetting("voting_open", false)}>
-                Close Voting
-              </button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-success" disabled=${settings.voting_open}
+                onClick=${() => updateSetting("voting_open", true)}>Open Voting</button>
+              <button class="btn btn-danger" disabled=${!settings.voting_open}
+                onClick=${() => updateSetting("voting_open", false)}>Close Voting</button>
             </div>
           </div>
-          <div className="card">
+          <div class="card">
             <h2>Results Visibility</h2>
-            <div className="status-row">
-              <span className="status-label">Results public:</span>
-              <span className={`big-status ${settings.results_public?"open":"closed"}`}>
-                {settings.results_public ? "YES" : "NO"}
+            <div class="status-row">
+              <span class="status-label">Results public:</span>
+              <span class=${"big-status "+(settings.results_public?"open":"closed")}>
+                ${settings.results_public ? "YES" : "NO"}
               </span>
             </div>
-            <div style={{display:"flex",gap:"8px"}}>
-              <button className="btn btn-success" disabled={settings.results_public}
-                onClick={() => updateSetting("results_public", true)}>
-                Show Results
-              </button>
-              <button className="btn btn-danger" disabled={!settings.results_public}
-                onClick={() => updateSetting("results_public", false)}>
-                Hide Results
-              </button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-success" disabled=${settings.results_public}
+                onClick=${() => updateSetting("results_public", true)}>Show Results</button>
+              <button class="btn btn-danger" disabled=${!settings.results_public}
+                onClick=${() => updateSetting("results_public", false)}>Hide Results</button>
             </div>
-            {msg && <div className="success-msg">{msg}</div>}
+            ${msg && html`<div class="ok">${msg}</div>`}
           </div>
-        </>
-      )}
+        </div>
+      `}
 
-      {tab === "results" && results && (
-        <>
-          <div className="card">
-            <div style={{display:"flex",gap:"16px",fontSize:"14px",color:"#94a3b8"}}>
-              <span>Total voters: <strong style={{color:"#e2e8f0"}}>{results.total_voters}</strong></span>
-              <span>Voting: <strong style={{color: results.voting_open?"#34d399":"#f87171"}}>{results.voting_open?"Open":"Closed"}</strong></span>
+      ${tab === "results" && results && html`
+        <div>
+          <div class="card">
+            <div style="display:flex;gap:16px;font-size:14px;color:#94a3b8">
+              <span>Total voters: <strong style="color:#e2e8f0">${results.total_voters}</strong></span>
+              <span>Voting: <strong style=${"color:"+(results.voting_open?"#34d399":"#f87171")}>
+                ${results.voting_open?"Open":"Closed"}
+              </strong></span>
             </div>
           </div>
-          {Object.entries(results.results).map(([cat, rows]) => (
-            <div key={cat} className="card">
-              <h2>{cat === "singing" ? "🎤 Best Singing Performance" : "👗 Best Costume"}</h2>
-              {rows.length === 0 ? <p style={{color:"#64748b",fontSize:"14px"}}>No votes yet</p> : rows.map((r, i) => (
-                <div key={r.id} className="result-row">
-                  <span className="result-rank">{medals[i] || `${i+1}.`}</span>
-                  <span className="result-name">{r.name}</span>
-                  <span className="result-pts">{r.points} pts</span>
-                  <span className="result-votes">{r.votes} votes</span>
-                </div>
-              ))}
+          ${Object.entries(results.results).map(([cat, rows]) => html`
+            <div key=${cat} class="card">
+              <h2>${cat==="singing"?"🎤 Best Singing Performance":"👗 Best Costume"}</h2>
+              ${rows.length === 0
+                ? html`<p style="color:#64748b;font-size:14px">No votes yet</p>`
+                : rows.map((r, i) => html`
+                    <div key=${r.id} class="result-row">
+                      <span class="result-rank">${medals[i]||(i+1)+"."}</span>
+                      <span class="result-name">${r.name}</span>
+                      <span class="result-pts">${r.points} pts</span>
+                      <span class="result-votes">${r.votes} votes</span>
+                    </div>
+                  `)
+              }
             </div>
-          ))}
-        </>
-      )}
+          `)}
+        </div>
+      `}
 
-      <button className="btn btn-outline" style={{marginTop:"8px"}}
-        onClick={() => { localStorage.removeItem("admin_token"); window.location.reload(); }}>
+      <button class="btn btn-outline" style="margin-top:8px"
+        onClick=${() => { localStorage.removeItem("admin_token"); window.location.reload(); }}>
         Logout
       </button>
     </div>
-  );
+  `;
 }
 
 function App() {
   const [authed, setAuthed] = useState(!!localStorage.getItem("admin_token"));
-  return authed ? <Dashboard/> : <LoginPage onLogin={() => setAuthed(true)}/>;
+  return authed
+    ? html`<${Dashboard}/>`
+    : html`<${LoginPage} onLogin=${() => setAuthed(true)}/>`;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(html`<${App}/>`);
 </script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   get "/health", to: "health#show"
+  get "/favicon.ico", to: proc { [204, {}, []] }
+  get "/.well-known/*path", to: proc { [204, {}, []] }
 
   namespace :api do
     post "auth/request",  to: "auth#request_link"
