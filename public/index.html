@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🎉 Party Vote!</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1a0533 0%, #2d0a5e 50%, #1a0533 100%);
+    min-height: 100vh;
+    color: #fff;
+  }
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 0 16px 40px;
+    display: flex;
+    flex-direction: column;
+  }
+  .header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+  .header h1 { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .header p { color: #c4b5fd; margin-top: 6px; font-size: 14px; }
+  .card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    backdrop-filter: blur(10px);
+  }
+  .card h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+  .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #c4b5fd; }
+  input[type="email"], input[type="text"] {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input::placeholder { color: rgba(255,255,255,0.4); }
+  input:focus { border-color: #a78bfa; }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 12px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(124,58,237,0.5); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #fff;
+  }
+  .error { color: #f87171; font-size: 14px; margin-top: 8px; }
+  .success { color: #34d399; font-size: 14px; margin-top: 8px; }
+  .contestant-list { display: flex; flex-direction: column; gap: 10px; }
+  .contestant-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .contestant-item:hover { border-color: rgba(167,139,250,0.5); background: rgba(124,58,237,0.1); }
+  .contestant-item.selected { border-color: #a78bfa; background: rgba(124,58,237,0.2); }
+  .contestant-item.disabled { opacity: 0.4; cursor: not-allowed; }
+  .rank-badge {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    flex-shrink: 0;
+  }
+  .rank-1 { background: #fbbf24; color: #1a0533; }
+  .rank-2 { background: #9ca3af; color: #1a0533; }
+  .rank-3 { background: #d97706; color: #1a0533; }
+  .rank-empty { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); font-size: 11px; }
+  .contestant-name { font-size: 15px; font-weight: 500; flex: 1; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab {
+    flex: 1; padding: 10px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.2);
+    background: transparent; color: rgba(255,255,255,0.6); font-weight: 600; cursor: pointer;
+    font-size: 13px; transition: all 0.2s;
+  }
+  .tab.active { border-color: #a78bfa; background: rgba(124,58,237,0.25); color: #fff; }
+  .tab.done { border-color: #34d399; color: #34d399; }
+  .check { display: inline-block; margin-right: 4px; }
+  .qr-section { text-align: center; margin-top: 8px; }
+  .qr-section p { color: #c4b5fd; font-size: 13px; margin-bottom: 12px; }
+  #qrcode { display: inline-block; background: #fff; padding: 12px; border-radius: 8px; }
+  #qrcode canvas, #qrcode img { display: block; }
+  .results-table { width: 100%; }
+  .result-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .result-row:last-child { border-bottom: none; }
+  .result-rank { font-size: 20px; width: 32px; text-align: center; }
+  .result-name { flex: 1; font-weight: 500; }
+  .result-pts { font-size: 14px; color: #a78bfa; font-weight: 700; }
+  .status-pill {
+    display: inline-block; padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; margin-bottom: 16px;
+  }
+  .status-open { background: rgba(52,211,153,0.2); color: #34d399; }
+  .status-closed { background: rgba(248,113,113,0.2); color: #f87171; }
+  .spinner {
+    width: 40px; height: 40px; margin: 40px auto;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #a78bfa;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .confetti { font-size: 48px; text-align: center; margin-bottom: 8px; animation: bounce 0.5s ease infinite alternate; }
+  @keyframes bounce { to { transform: translateY(-8px); } }
+  .info-box { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3); border-radius: 10px; padding: 14px; font-size: 14px; color: #c4b5fd; line-height: 1.5; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+const API = "";
+
+function api(path, opts = {}) {
+  const token = localStorage.getItem("session_token");
+  return fetch(API + path, {
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    ...opts,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  }).then(async r => {
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Request failed");
+    return data;
+  });
+}
+
+function QRCode() {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    new window.QRCode(ref.current, {
+      text: window.location.origin + window.location.pathname,
+      width: 160, height: 160,
+      colorDark: "#1a0533", colorLight: "#ffffff",
+    });
+  }, []);
+  return (
+    <div className="qr-section">
+      <p>Share this QR code so guests can vote!</p>
+      <div id="qrcode" ref={ref}></div>
+    </div>
+  );
+}
+
+function EmailPage({ onSent }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function submit(e) {
+    e.preventDefault();
+    setLoading(true); setError("");
+    try {
+      await api("/api/auth/request", { method: "POST", body: { email } });
+      onSent(email);
+    } catch (err) { setError(err.message); }
+    finally { setLoading(false); }
+  }
+
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>🎉 Party Votes!</h1>
+        <p>Enter your email to get your voting link</p>
+      </div>
+      <div className="card">
+        <h2>Sign In to Vote</h2>
+        <form onSubmit={submit}>
+          <input type="email" placeholder="your@email.com" value={email}
+            onChange={e => setEmail(e.target.value)} required autoFocus/>
+          {error && <div className="error">{error}</div>}
+          <button className="btn btn-primary" disabled={loading}>
+            {loading ? "Sending..." : "Send Magic Link ✉️"}
+          </button>
+        </form>
+      </div>
+      <div className="card">
+        <QRCode/>
+      </div>
+    </div>
+  );
+}
+
+function CheckEmailPage({ email, onBack }) {
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>✉️ Check Email!</h1>
+      </div>
+      <div className="card">
+        <div className="info-box">
+          We sent a magic link to <strong>{email}</strong>. Click it to log in and vote!
+          <br/><br/>
+          The link expires in <strong>30 minutes</strong>.
+        </div>
+        <button className="btn btn-outline" onClick={onBack}>Try a different email</button>
+      </div>
+    </div>
+  );
+}
+
+const CATEGORY_LABELS = { singing: "🎤 Best Singing Performance", costume: "👗 Best Costume" };
+
+function VotingPage({ user, onVoted }) {
+  const [activeTab, setActiveTab] = useState("singing");
+  const [contestants, setContestants] = useState({});
+  const [selections, setSelections] = useState({ singing: [], costume: [] });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [votedSinging, setVotedSinging] = useState(user.voted_singing);
+  const [votedCostume, setVotedCostume] = useState(user.voted_costume);
+
+  useEffect(() => {
+    api("/api/categories").then(data => {
+      setContestants(data.categories);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  function toggleContestant(category, id) {
+    if (votedSinging && category === "singing") return;
+    if (votedCostume && category === "costume") return;
+    setSelections(prev => {
+      const cur = [...prev[category]];
+      const idx = cur.indexOf(id);
+      if (idx >= 0) {
+        cur.splice(idx, 1);
+      } else if (cur.length < 3) {
+        cur.push(id);
+      }
+      return { ...prev, [category]: cur };
+    });
+  }
+
+  async function submitVote(category) {
+    const sel = selections[category];
+    if (sel.length !== 3) { setError("Select exactly 3 contestants"); return; }
+    setSubmitting(true); setError("");
+    try {
+      await api("/api/votes", {
+        method: "POST",
+        body: {
+          category,
+          selections: sel.map((id, i) => ({ contestant_id: id, rank: i + 1 }))
+        }
+      });
+      if (category === "singing") setVotedSinging(true);
+      if (category === "costume") setVotedCostume(true);
+      if ((category === "singing" && votedCostume) || (category === "costume" && votedSinging)) {
+        onVoted();
+      } else {
+        setActiveTab(category === "singing" ? "costume" : "singing");
+      }
+    } catch (err) { setError(err.message); }
+    finally { setSubmitting(false); }
+  }
+
+  if (loading) return <div className="app"><div className="spinner"></div></div>;
+
+  const allDone = votedSinging && votedCostume;
+  if (allDone) return <DonePage/>;
+
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>🗳️ Cast Your Votes</h1>
+        <p>Hi, {user.email}</p>
+      </div>
+      <div className="tabs">
+        {["singing","costume"].map(cat => (
+          <button key={cat}
+            className={`tab ${activeTab === cat ? "active" : ""} ${(cat === "singing" ? votedSinging : votedCostume) ? "done" : ""}`}
+            onClick={() => setActiveTab(cat)}>
+            {(cat === "singing" ? votedSinging : votedCostume) && <span className="check">✓</span>}
+            {cat === "singing" ? "Singing" : "Costume"}
+          </button>
+        ))}
+      </div>
+      {["singing","costume"].map(cat => activeTab !== cat ? null : (
+        <div key={cat} className="card">
+          <h2>{CATEGORY_LABELS[cat]}</h2>
+          {(cat === "singing" ? votedSinging : votedCostume) ? (
+            <div className="info-box">✓ You already voted in this category!</div>
+          ) : (
+            <>
+              <h3>Pick your top 3 (in order)</h3>
+              <div className="contestant-list">
+                {(contestants[cat] || []).map(c => {
+                  const sel = selections[cat];
+                  const rankIdx = sel.indexOf(c.id);
+                  const rank = rankIdx >= 0 ? rankIdx + 1 : null;
+                  const isMax = sel.length >= 3 && rank === null;
+                  return (
+                    <div key={c.id}
+                      className={`contestant-item ${rank ? "selected" : ""} ${isMax ? "disabled" : ""}`}
+                      onClick={() => !isMax && toggleContestant(cat, c.id)}>
+                      <div className={`rank-badge ${rank ? `rank-${rank}` : "rank-empty"}`}>
+                        {rank || "·"}
+                      </div>
+                      <span className="contestant-name">{c.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {error && <div className="error">{error}</div>}
+              <div style={{marginTop:"8px",color:"#c4b5fd",fontSize:"13px"}}>
+                {selections[cat].length}/3 selected
+              </div>
+              <button className="btn btn-primary"
+                disabled={selections[cat].length !== 3 || submitting}
+                onClick={() => submitVote(cat)}>
+                {submitting ? "Submitting..." : `Submit ${cat === "singing" ? "Singing" : "Costume"} Vote`}
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DonePage() {
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>🎊 Votes Cast!</h1>
+      </div>
+      <div className="card" style={{textAlign:"center"}}>
+        <div className="confetti">🎉</div>
+        <h2 style={{marginBottom:"12px"}}>You're all done!</h2>
+        <p style={{color:"#c4b5fd",lineHeight:"1.6"}}>
+          Results will be revealed when the admin closes voting.<br/>
+          Enjoy the party! 🥳
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ResultsPage() {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    api("/api/results").then(setData).catch(e => setError(e.message));
+  }, []);
+
+  const medals = ["🥇","🥈","🥉"];
+
+  if (error) return (
+    <div className="app">
+      <div className="header"><h1>🎉 Party Votes!</h1></div>
+      <div className="card"><div className="info-box">Results are not available yet. Check back later!</div></div>
+    </div>
+  );
+
+  if (!data) return <div className="app"><div className="spinner"></div></div>;
+
+  return (
+    <div className="app">
+      <div className="header">
+        <h1>🏆 Results!</h1>
+        <p>Here are the winners!</p>
+      </div>
+      {Object.entries(data.results).map(([cat, rows]) => (
+        <div key={cat} className="card">
+          <h2>{CATEGORY_LABELS[cat]}</h2>
+          <div className="results-table">
+            {rows.map((r, i) => (
+              <div key={r.id} className="result-row">
+                <span className="result-rank">{medals[i] || `${i+1}.`}</span>
+                <span className="result-name">{r.name}</span>
+                <span className="result-pts">{r.points} pts</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const [page, setPage] = useState("loading");
+  const [email, setEmail] = useState("");
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    if (token) {
+      api(`/api/auth/verify?token=${token}`)
+        .then(data => {
+          localStorage.setItem("session_token", data.session_token);
+          window.history.replaceState({}, "", "/");
+          return api("/api/auth/me");
+        })
+        .then(me => { setUser(me); setPage("vote"); })
+        .catch(() => setPage("home"));
+      return;
+    }
+
+    const saved = localStorage.getItem("session_token");
+    if (saved) {
+      api("/api/auth/me")
+        .then(me => {
+          setUser(me);
+          if (!me.voting_open) setPage("done");
+          else if (me.voted_singing && me.voted_costume) setPage("done");
+          else setPage("vote");
+        })
+        .catch(() => { localStorage.removeItem("session_token"); setPage("home"); });
+    } else {
+      setPage("home");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    if (!user.voting_open) {
+      api("/api/results").then(() => setPage("results")).catch(() => setPage("done"));
+    }
+  }, [user]);
+
+  if (page === "loading") return <div className="app"><div className="spinner"></div></div>;
+  if (page === "home") return <EmailPage onSent={e => { setEmail(e); setPage("check"); }}/>;
+  if (page === "check") return <CheckEmailPage email={email} onBack={() => setPage("home")}/>;
+  if (page === "vote" && user) return <VotingPage user={user} onVoted={() => setPage("done")}/>;
+  if (page === "done") return <DonePage/>;
+  if (page === "results") return <ResultsPage/>;
+  return <div className="app"><div className="spinner"></div></div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
