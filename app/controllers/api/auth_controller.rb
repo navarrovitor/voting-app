@@ -3,8 +3,10 @@ class Api::AuthController < ApplicationController
     code = params[:code]&.upcase&.strip
     return render json: { error: "Code required" }, status: :unprocessable_entity if code.blank?
 
-    contestant = Contestant.find_by(code: code, present: true)
-    return render json: { error: "Invalid code or not checked in yet" }, status: :unauthorized unless contestant
+    contestant = Contestant.find_by(code: code)
+    return render json: { error: "Código inválido" }, status: :unauthorized unless contestant
+
+    contestant.update!(present: true) unless contestant.present?
 
     guest = Guest.find_or_create_by!(identifier: code) { |g| g.contestant = contestant }
     guest.update!(session_token: SecureRandom.urlsafe_base64(32))
