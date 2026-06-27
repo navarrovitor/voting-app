@@ -7,8 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"/>
-<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -165,7 +165,7 @@ function Stars() {
   return stars.map((s, i) => html`
     <div key=${i} style=${{ position:"absolute", fontSize:s.size, color:s.color,
       animation:`starPulse ${s.dur} ease-in-out infinite ${s.delay}`,
-      top:s.top, bottom:s.bottom, left:s.left, right:s.right }}}>✦</div>
+      top:s.top, bottom:s.bottom, left:s.left, right:s.right }}>✦</div>
   `);
 }
 

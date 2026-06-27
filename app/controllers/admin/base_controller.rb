@@ -1,5 +1,6 @@
 class Admin::BaseController < ApplicationController
   before_action :require_admin!
+  wrap_parameters false
 
   private
 

@@ -16,6 +16,7 @@ h2{font-size:18px;font-weight:700;margin-bottom:14px}
 h3{font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
 .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
 input[type=password],input[type=text]{width:100%;padding:12px 14px;border-radius:8px;border:2px solid #334155;background:#0f172a;color:#e2e8f0;font-size:15px;outline:none;transition:border-color 0.2s}
+.add-code{width:90px!important;text-transform:uppercase;letter-spacing:2px;font-family:monospace;font-weight:700}
 input:focus{border-color:#7c3aed}
 .btn{padding:10px 18px;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s}
 .btn-primary{background:#7c3aed;color:#fff}
@@ -31,7 +32,13 @@ input:focus{border-color:#7c3aed}
 .row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .row:last-child{margin-bottom:0}
 .cname{flex:1;font-size:14px;font-weight:500}
+.ccode{font-size:11px;font-weight:700;letter-spacing:1px;color:#a78bfa;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:5px;padding:2px 7px;margin-right:4px;font-family:monospace}
 .tgrp{display:flex;gap:6px}
+.btn-present{background:#0f766e;color:#fff;border:none}
+.btn-present:hover{background:#0d9488}
+.btn-absent{background:transparent;border:1px solid #475569;color:#64748b}
+.btn-absent:hover{border-color:#0f766e;color:#0d9488}
+.add-code{width:90px;flex:none}
 .status-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .status-label{font-size:14px;flex:1}
 .big-status{font-size:28px;font-weight:800}
@@ -68,6 +75,7 @@ function api(path, opts = {}) {
     ...opts,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   }).then(async r => {
+    if (r.status === 204) { if (!r.ok) throw new Error("Failed"); return null; }
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || "Failed");
     return data;
@@ -113,6 +121,7 @@ function Dashboard() {
   const [settings, setSettings] = useState({ voting_open: false, results_public: false });
   const [results, setResults] = useState(null);
   const [newName, setNewName] = useState("");
+  const [newCode, setNewCode] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -128,9 +137,11 @@ function Dashboard() {
 
   async function addContestant() {
     if (!newName.trim()) return;
-    const c = await api("/admin/contestants", { method: "POST", body: { name: newName.trim() } });
+    const body = { name: newName.trim() };
+    if (newCode.trim()) body.code = newCode.trim().toUpperCase();
+    const c = await api("/admin/contestants", { method: "POST", body });
     setContestants(prev => [...prev, c]);
-    setNewName("");
+    setNewName(""); setNewCode("");
   }
 
   async function toggleField(id, field) {
@@ -169,11 +180,16 @@ function Dashboard() {
       ${tab === "contestants" && html`
         <div class="card">
           <h2>Contestants</h2>
-          <h3>Toggle per category (🎤 Singing | 👗 Costume)</h3>
+          <h3>Roster — toggle present at party + categories</h3>
           ${contestants.map(c => html`
             <div key=${c.id} class="row">
+              <span class="ccode">${c.code||"—"}</span>
               <span class="cname">${c.name}</span>
               <div class="tgrp">
+                <button class=${"btn btn-sm "+(c.present?"btn-present":"btn-absent")}
+                  onClick=${() => toggleField(c.id, "present")} title="Present at party">
+                  ${c.present?"✓ Here":"Absent"}
+                </button>
                 <button class=${"btn btn-sm "+(c.singing_enabled?"btn-success":"btn-outline")}
                   onClick=${() => toggleField(c.id, "singing_enabled")}>🎤</button>
                 <button class=${"btn btn-sm "+(c.costume_enabled?"btn-success":"btn-outline")}
@@ -188,7 +204,14 @@ function Dashboard() {
             <input type="text" placeholder="Name" value=${newName}
               onInput=${e => setNewName(e.target.value)}
               onKeyDown=${e => e.key==="Enter" && addContestant()}/>
+            <input class="add-code" type="text" placeholder="Code (auto)" value=${newCode}
+              maxLength="4"
+              onInput=${e => setNewCode(e.target.value.toUpperCase())}
+              onKeyDown=${e => e.key==="Enter" && addContestant()}/>
             <button class="btn btn-primary" onClick=${addContestant}>Add</button>
+          </div>
+          <div class="error" style=${{ fontSize:"11px", color:"#94a3b8", marginTop:"6px" }}>
+            Leave code blank to auto-generate a 4-character code.
           </div>
         </div>
       `}
