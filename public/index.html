@@ -186,14 +186,14 @@ function WelcomePage({ onLogin }) {
       <div class="curtain-r"></div>
       <${Stars}/>
       <div class="float-icon" style=${{ fontSize:"48px", marginBottom:"20px" }}>🎭</div>
-      <div class="gold-label">Festa Privada</div>
-      <h1 class="display-h1">A<br/>Grande<br/>Votação</h1>
+      <div class="gold-label">Festa do Vitão</div>
+      <h1 class="display-h1">A grande<br/>votação</h1>
       <div class="divider-bar"></div>
       <p class="muted" style=${{ maxWidth:"256px", marginBottom:"28px" }}>
-        Digite o código do seu crachá<br/>para votar esta noite
+        Digite o seu código
       </p>
       <form onSubmit=${submit} style=${{ width:"100%", maxWidth:"320px" }}>
-        <input class="email-input" type="text" placeholder="Seu código (ex. X7K2)"
+        <input class="email-input" type="text" placeholder="Seu código"
           value=${code} maxLength="4" autocomplete="off" autocapitalize="characters"
           style=${{ textTransform:"uppercase", letterSpacing:"6px", textAlign:"center", fontSize:"22px" }}
           onInput=${e => setCode(e.target.value.toUpperCase())} required/>
@@ -203,11 +203,6 @@ function WelcomePage({ onLogin }) {
           ${loading ? "Entrando…" : "Entrar na Votação ✦"}
         </button>
       </form>
-      <div class="stats-row">
-        <div class="stat"><div class="stat-num">2</div><div class="stat-label">Categorias</div></div>
-        <div class="stat-divider"></div>
-        <div class="stat"><div class="stat-num">3</div><div class="stat-label">Votos Cada</div></div>
-      </div>
     </div>
   `;
 }
@@ -549,6 +544,36 @@ function ResultsPage() {
   `;
 }
 
+/* ── Waiting room ── */
+function WaitingPage({ name, onVotingOpen }) {
+  const { useEffect: ue } = React;
+  ue(() => {
+    const id = setInterval(() => {
+      api("/api/auth/me").then(me => { if (me.voting_open) { clearInterval(id); onVotingOpen(); } }).catch(() => {});
+    }, 8000);
+    return () => clearInterval(id);
+  }, []);
+
+  return html`
+    <div class="screen-center">
+      <div class="curtain-l"></div>
+      <div class="curtain-r"></div>
+      <${Stars}/>
+      <div class="float-icon" style=${{ fontSize:"52px", marginBottom:"20px" }}>⏳</div>
+      <div class="gold-label">Aguarde</div>
+      <h1 class="display-h1" style=${{ fontSize:"52px" }}>A votação<br/>ainda não<br/>começou</h1>
+      <div class="divider-bar"></div>
+      <p class="muted" style=${{ maxWidth:"260px", marginBottom:"0" }}>
+        Fique por perto!<br/>Esta página vai atualizar automaticamente quando a votação abrir.
+      </p>
+      <div style=${{ marginTop:"36px", display:"flex", alignItems:"center", gap:"10px", color:"rgba(248,244,255,0.22)", fontSize:"13px" }}>
+        <div style=${{ width:"6px", height:"6px", borderRadius:"50%", background:"rgba(168,85,247,0.6)", animation:"starPulse 1.6s ease-in-out infinite" }}></div>
+        verificando a cada 8 segundos…
+      </div>
+    </div>
+  `;
+}
+
 function Spinner() {
   return html`<div style=${{ width:"40px", height:"40px", margin:"80px auto",
     border:"3px solid rgba(255,255,255,0.08)", borderTopColor:"#a855f7",
@@ -570,7 +595,11 @@ function App() {
       .then(me => { setUser(me); return api("/api/categories").then(d => { setCategories(d.categories); return me; }); })
       .then(me => {
         if (!me.voting_open) {
-          api("/api/results").then(() => setPage("results")).catch(() => setPage("done"));
+          if (me.voted_singing && me.voted_costume) {
+            api("/api/results").then(() => setPage("results")).catch(() => setPage("done"));
+          } else {
+            setPage("waiting");
+          }
         } else if (me.voted_singing && me.voted_costume) {
           setPage("done");
         } else {
@@ -604,6 +633,7 @@ function App() {
 
   if (page === "loading")    return shell(html`<${Spinner}/>`);
   if (page === "home")       return shell(html`<${WelcomePage} onLogin=${() => loadSession().catch(() => setPage("home"))}/>`);
+  if (page === "waiting")    return shell(html`<${WaitingPage} name=${user?.name} onVotingOpen=${() => loadSession().catch(() => setPage("home"))}/>`);
   if (page === "results")    return shell(html`<${ResultsPage}/>`);
   if (page === "done")       return shell(html`<${DonePage} localVotes=${localVotes.singing.length ? localVotes : null}/>`);
   if (page === "review")     return shell(html`<${ReviewPage}
