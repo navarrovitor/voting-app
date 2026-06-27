@@ -4,9 +4,8 @@ Rails.application.routes.draw do
   get "/.well-known/*path", to: proc { [204, {}, []] }
 
   namespace :api do
-    post "auth/request",  to: "auth#request_link"
-    get  "auth/verify",   to: "auth#verify"
-    get  "auth/me",       to: "auth#me"
+    post "auth/login",     to: "auth#login"
+    get  "auth/me",        to: "auth#me"
 
     get  "categories",    to: "contestants#categories"
     get  "results",       to: "results#index"

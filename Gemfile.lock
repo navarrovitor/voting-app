@@ -231,7 +231,6 @@ PLATFORMS
 
 DEPENDENCIES
   debug
-  mail
   pg (~> 1.5)
   puma (~> 6.4)
   rack-cors

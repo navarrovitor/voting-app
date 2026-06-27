@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_01_01_000005) do
+ActiveRecord::Schema[7.2].define(version: 2024_01_01_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -27,13 +27,13 @@ ActiveRecord::Schema[7.2].define(version: 2024_01_01_000005) do
   end
 
   create_table "guests", force: :cascade do |t|
-    t.string "email", null: false
-    t.string "auth_token"
-    t.datetime "token_expires_at"
     t.string "session_token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_guests_on_email", unique: true
+    t.string "identifier"
+    t.bigint "contestant_id"
+    t.index ["contestant_id"], name: "index_guests_on_contestant_id"
+    t.index ["identifier"], name: "index_guests_on_identifier", unique: true
     t.index ["session_token"], name: "index_guests_on_session_token", unique: true
   end
 
@@ -58,6 +58,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_01_01_000005) do
     t.index ["guest_id"], name: "index_votes_on_guest_id"
   end
 
+  add_foreign_key "guests", "contestants"
   add_foreign_key "votes", "contestants"
   add_foreign_key "votes", "guests"
 end

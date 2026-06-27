@@ -169,20 +169,21 @@ function Stars() {
   `);
 }
 
-/* ── Welcome / Email entry ── */
-function WelcomePage({ onSent }) {
-  const [email, setEmail] = useState("");
+/* ── Welcome / Code entry ── */
+function WelcomePage({ onLogin }) {
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=" + encodeURIComponent(window.location.origin + "/");
 
   async function submit(e) {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!code.trim()) return;
     setLoading(true); setError("");
     try {
-      await api("/api/auth/request", { method:"POST", body:{ email } });
-      onSent(email);
+      const d = await api("/api/auth/login", { method:"POST", body:{ code } });
+      localStorage.setItem("session_token", d.session_token);
+      onLogin();
     } catch(err) { setError(err.message); }
     finally { setLoading(false); }
   }
@@ -197,15 +198,17 @@ function WelcomePage({ onSent }) {
       <h1 class="display-h1">The<br/>Grand<br/>Vote</h1>
       <div class="divider-bar"></div>
       <p class="muted" style=${{ maxWidth:"256px", marginBottom:"36px" }}>
-        Two categories · Three picks each<br/>Cast your vote for tonight's stars
+        Enter the code on your name tag<br/>to cast your vote tonight
       </p>
       <form onSubmit=${submit} style=${{ width:"100%", maxWidth:"320px" }}>
-        <input class="email-input" type="email" placeholder="your@email.com"
-          value=${email} onInput=${e => setEmail(e.target.value)} required/>
+        <input class="email-input" type="text" placeholder="Your code (e.g. X7K2)"
+          value=${code} maxLength="4" autocomplete="off" autocapitalize="characters"
+          style=${{ textTransform:"uppercase", letterSpacing:"6px", textAlign:"center", fontSize:"22px" }}
+          onInput=${e => setCode(e.target.value.toUpperCase())} required/>
         <div class="err-msg">${error}</div>
         <button class="btn-grad" type="submit" disabled=${loading}
           style=${{ width:"100%", marginTop:"4px", padding:"18px", borderRadius:"14px" }}>
-          ${loading ? "Sending…" : "Get My Voting Link ✦"}
+          ${loading ? "Entering…" : "Enter The Vote ✦"}
         </button>
       </form>
       <div class="qr-wrap">
@@ -218,27 +221,6 @@ function WelcomePage({ onSent }) {
         <div class="stat-divider"></div>
         <div class="stat"><div class="stat-num">3</div><div class="stat-label">Picks Each</div></div>
       </div>
-    </div>
-  `;
-}
-
-/* ── Check email ── */
-function CheckEmailPage({ email, onBack }) {
-  return html`
-    <div class="screen-center">
-      <div class="curtain-l"></div>
-      <div class="curtain-r"></div>
-      <div class="check-icon">✉️</div>
-      <div class="gold-label">Link Sent!</div>
-      <h1 class="display-h1" style=${{ fontSize:"44px", marginBottom:"0" }}>Check<br/>Your<br/>Email</h1>
-      <div class="divider-bar"></div>
-      <p class="muted" style=${{ maxWidth:"272px", marginBottom:"40px" }}>
-        We sent a magic link to<br/><strong style=${{ color:"#f8f4ff" }}>${email}</strong><br/>
-        Click it to start voting. Expires in 30 min.
-      </p>
-      <button class="btn-ghost" style=${{ maxWidth:"320px", width:"100%" }} onClick=${onBack}>
-        ← Try a different email
-      </button>
     </div>
   `;
 }
@@ -588,42 +570,32 @@ function Spinner() {
 
 /* ── App ── */
 function App() {
-  const [page, setPage]           = useState("loading");
-  const [sentEmail, setSentEmail] = useState("");
-  const [user, setUser]           = useState(null);
+  const [page, setPage]             = useState("loading");
+  const [user, setUser]             = useState(null);
   const [categories, setCategories] = useState({ singing:[], costume:[] });
   const [localVotes, setLocalVotes] = useState({ singing:[], costume:[] });
   const [activeCategory, setActiveCategory] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
+  function loadSession() {
+    return api("/api/auth/me")
+      .then(me => { setUser(me); return api("/api/categories").then(d => { setCategories(d.categories); return me; }); })
+      .then(me => {
+        if (!me.voting_open) {
+          api("/api/results").then(() => setPage("results")).catch(() => setPage("done"));
+        } else if (me.voted_singing && me.voted_costume) {
+          setPage("done");
+        } else {
+          setPage("categories");
+        }
+      });
+  }
+
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-
-    if (token) {
-      api(`/api/auth/verify?token=${token}`)
-        .then(d => { localStorage.setItem("session_token", d.session_token); window.history.replaceState({}, "", "/"); return api("/api/auth/me"); })
-        .then(me => { setUser(me); return api("/api/categories"); })
-        .then(d => { setCategories(d.categories); setPage("categories"); })
-        .catch(() => setPage("home"));
-      return;
-    }
-
     const saved = localStorage.getItem("session_token");
     if (saved) {
-      api("/api/auth/me")
-        .then(me => { setUser(me); return api("/api/categories").then(d => { setCategories(d.categories); return {me, d}; }); })
-        .then(({me, d}) => {
-          if (!me.voting_open) {
-            api("/api/results").then(() => setPage("results")).catch(() => setPage("done"));
-          } else if (me.voted_singing && me.voted_costume) {
-            setPage("done");
-          } else {
-            setPage("categories");
-          }
-        })
-        .catch(() => { localStorage.removeItem("session_token"); setPage("home"); });
+      loadSession().catch(() => { localStorage.removeItem("session_token"); setPage("home"); });
     } else {
       setPage("home");
     }
@@ -644,8 +616,7 @@ function App() {
   `;
 
   if (page === "loading")    return shell(html`<${Spinner}/>`);
-  if (page === "home")       return shell(html`<${WelcomePage} onSent=${e => { setSentEmail(e); setPage("check"); }}/>`);
-  if (page === "check")      return shell(html`<${CheckEmailPage} email=${sentEmail} onBack=${() => setPage("home")}/>`);
+  if (page === "home")       return shell(html`<${WelcomePage} onLogin=${() => loadSession().catch(() => setPage("home"))}/>`);
   if (page === "results")    return shell(html`<${ResultsPage}/>`);
   if (page === "done")       return shell(html`<${DonePage} localVotes=${localVotes.singing.length ? localVotes : null}/>`);
   if (page === "review")     return shell(html`<${ReviewPage}
