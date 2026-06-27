@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-<title>🎭 The Grand Vote</title>
+<title>🎭 A Grande Votação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap"/>
@@ -12,7 +12,7 @@
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js" crossorigin="anonymous"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#050210}
+html,body{height:100%;background:#050210;overflow:hidden}
 body{font-family:'DM Sans',sans-serif}
 input{color-scheme:dark}
 input::placeholder{color:rgba(248,244,255,0.28)}
@@ -25,8 +25,8 @@ input:focus{outline:none}
 @keyframes floatY{0%,100%{transform:translateY(0px)}50%{transform:translateY(-8px)}}
 @keyframes starPulse{0%,100%{opacity:0.2;transform:scale(0.75)}50%{opacity:0.85;transform:scale(1)}}
 
-.shell{background:#050210;min-height:100svh;display:flex;justify-content:center}
-.phone{width:100%;max-width:430px;background:#0d0618;position:relative}
+.shell{background:#050210;height:100svh;display:flex;justify-content:center;overflow:hidden}
+.phone{width:100%;max-width:430px;background:#0d0618;position:relative;height:100svh;overflow:hidden}
 .spotlight{position:absolute;top:0;left:0;right:0;height:420px;background:radial-gradient(ellipse at 50% 0%,rgba(168,85,247,0.22) 0%,transparent 70%);pointer-events:none;z-index:0}
 .curtain-l{position:absolute;inset:0 auto 0 0;width:26px;background:linear-gradient(to right,rgba(90,10,38,0.95),transparent);pointer-events:none;z-index:2}
 .curtain-r{position:absolute;inset:0 0 0 auto;width:26px;background:linear-gradient(to left,rgba(90,10,38,0.95),transparent);pointer-events:none;z-index:2}
@@ -35,10 +35,10 @@ input:focus{outline:none}
 .star{position:absolute;font-size:10px;color:rgba(245,200,66,0.7);animation:starPulse 2.8s ease-in-out infinite}
 
 /* Center screen (welcome, done) */
-.screen-center{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:64px 36px;position:relative;z-index:1;animation:fadeUp 0.7s ease both}
+.screen-center{height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 36px;overflow:hidden;position:relative;z-index:1;animation:fadeUp 0.7s ease both}
 
 /* Flow screen (categories, review) */
-.screen-flow{min-height:100svh;display:flex;flex-direction:column;padding:58px 24px 44px;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
+.screen-flow{height:100svh;display:flex;flex-direction:column;padding:48px 24px 36px;overflow:hidden;position:relative;z-index:1;animation:fadeUp 0.5s ease both}
 
 /* Full-height scroll screen (voting) */
 .screen-vote{height:100svh;display:flex;flex-direction:column;position:relative;z-index:1;animation:fadeUp 0.4s ease both}
@@ -48,7 +48,7 @@ input:focus{outline:none}
 .display-h1{font-family:'Playfair Display',serif;font-size:62px;font-weight:900;color:#f8f4ff;line-height:0.93;text-align:center;letter-spacing:-1px}
 .display-h2{font-family:'Playfair Display',serif;font-size:36px;color:#f8f4ff;font-weight:700;line-height:1.1}
 .display-h2-lg{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;color:#f8f4ff;line-height:1.0}
-.divider-bar{width:54px;height:2px;background:linear-gradient(90deg,#a855f7,#ec4899);margin:24px auto}
+.divider-bar{width:54px;height:2px;background:linear-gradient(90deg,#a855f7,#ec4899);margin:20px auto}
 .muted{color:rgba(248,244,255,0.48);font-size:14px;line-height:1.75;text-align:center}
 
 /* Primary CTA */
@@ -57,27 +57,20 @@ input:focus{outline:none}
 .btn-ghost{width:100%;background:rgba(255,255,255,0.06);color:rgba(248,244,255,0.5);border:1px solid rgba(255,255,255,0.1);padding:15px;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
 
 /* Stats row */
-.stats-row{display:flex;gap:28px;margin-top:44px;align-items:center}
+.stats-row{display:flex;gap:28px;margin-top:36px;align-items:center}
 .stat{text-align:center}
 .stat-num{font-family:'Playfair Display',serif;font-size:24px;color:#f8f4ff;font-weight:700}
 .stat-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(248,244,255,0.32);margin-top:3px}
 .stat-divider{width:1px;height:38px;background:rgba(255,255,255,0.1)}
 
-/* Email input */
+/* Code input */
 .email-wrap{width:100%;max-width:320px;margin:0 auto 16px}
 .email-input{width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:14px;padding:16px 18px;color:#f8f4ff;font-size:16px;font-family:'DM Sans',sans-serif;caret-color:#a855f7}
 .email-input:focus{border-color:rgba(168,85,247,0.6);background:rgba(168,85,247,0.08)}
 .err-msg{color:#f87171;font-size:13px;text-align:center;margin-top:8px;min-height:18px}
 
-/* QR */
-.qr-wrap{margin-top:36px;text-align:center}
-.qr-hint{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(248,244,255,0.22);margin-bottom:10px}
-
-/* Check email screen */
-.check-icon{font-size:52px;margin-bottom:22px;animation:floatY 3s ease-in-out infinite;line-height:1}
-
 /* Category cards */
-.cat-header{text-align:center;margin-bottom:40px}
+.cat-header{text-align:center;margin-bottom:28px}
 .cat-header-label{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:rgba(245,200,66,0.82);font-weight:600;margin-bottom:9px}
 .cat-card-icon{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
 .cat-card-title{color:#f8f4ff;font-size:18px;font-weight:600;line-height:1.2}
@@ -85,7 +78,7 @@ input:focus{outline:none}
 .cat-prog-track{height:4px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden}
 .cat-prog-info{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:rgba(248,244,255,0.35)}
 .cat-footer{margin-top:auto}
-.cat-divider{height:1px;background:rgba(255,255,255,0.07);margin-bottom:20px}
+.cat-divider{height:1px;background:rgba(255,255,255,0.07);margin-bottom:16px}
 .cat-hint{text-align:center;color:rgba(248,244,255,0.26);font-size:13px}
 
 /* Voting header */
@@ -110,7 +103,7 @@ input:focus{outline:none}
 /* Review */
 .review-section-label{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .review-section-text{font-size:11px;letter-spacing:3px;text-transform:uppercase;font-weight:700}
-.review-divider{height:1px;background:rgba(255,255,255,0.08);margin-bottom:32px}
+.review-divider{height:1px;background:rgba(255,255,255,0.08);margin-bottom:24px}
 .review-actions{display:flex;flex-direction:column;gap:12px}
 
 /* Done summary */
@@ -123,12 +116,12 @@ input:focus{outline:none}
 </style>
 </head>
 <body>
-<div id="root"><div class="shell"><div class="phone"><div class="spotlight"></div><div style="min-height:100svh;display:flex;align-items:center;justify-content:center"><div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.08);border-top-color:#a855f7;border-radius:50%;animation:spin 0.8s linear infinite"></div></div></div></div></div>
+<div id="root"><div class="shell"><div class="phone"><div class="spotlight"></div><div style="height:100svh;display:flex;align-items:center;justify-content:center"><div style="width:40px;height:40px;border:3px solid rgba(255,255,255,0.08);border-top-color:#a855f7;border-radius:50%;animation:spin 0.8s linear infinite"></div></div></div></div></div>
 <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 <script>
 window.onerror = function(msg,src,line,_,err){
   document.getElementById("root").innerHTML =
-    '<div style="color:#f87171;padding:24px;font-family:monospace;background:#0d0618;min-height:100vh;white-space:pre-wrap">Error: '+msg+'\n'+(err&&err.stack||src+':'+line)+'</div>';
+    '<div style="color:#f87171;padding:24px;font-family:monospace;background:#0d0618;height:100svh;white-space:pre-wrap">Erro: '+msg+'\n'+(err&&err.stack||src+':'+line)+'</div>';
 };
 
 const html = htm.bind(React.createElement);
@@ -137,7 +130,7 @@ const { useState, useEffect } = React;
 const RANK_COLORS  = ['#f5c842','#c8c8c8','#cd7f32'];
 const RANK_BGS     = ['rgba(245,200,66,0.12)','rgba(200,200,200,0.1)','rgba(205,127,50,0.12)'];
 const RANK_BORDERS = ['rgba(245,200,66,0.3)','rgba(200,200,200,0.28)','rgba(205,127,50,0.3)'];
-const RANK_LABELS  = ['1ST','2ND','3RD'];
+const RANK_LABELS  = ['1º','2º','3º'];
 const RANK_MEDALS  = ['🥇','🥈','🥉'];
 
 function api(path, opts = {}) {
@@ -148,7 +141,7 @@ function api(path, opts = {}) {
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   }).then(async r => {
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "Request failed");
+    if (!r.ok) throw new Error(data.error || "Erro na requisição");
     return data;
   });
 }
@@ -174,7 +167,6 @@ function WelcomePage({ onLogin }) {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=" + encodeURIComponent(window.location.origin + "/");
 
   async function submit(e) {
     e.preventDefault();
@@ -193,33 +185,28 @@ function WelcomePage({ onLogin }) {
       <div class="curtain-l"></div>
       <div class="curtain-r"></div>
       <${Stars}/>
-      <div class="float-icon" style=${{ fontSize:"54px", marginBottom:"26px" }}>🎭</div>
-      <div class="gold-label">Private Party</div>
-      <h1 class="display-h1">The<br/>Grand<br/>Vote</h1>
+      <div class="float-icon" style=${{ fontSize:"48px", marginBottom:"20px" }}>🎭</div>
+      <div class="gold-label">Festa Privada</div>
+      <h1 class="display-h1">A<br/>Grande<br/>Votação</h1>
       <div class="divider-bar"></div>
-      <p class="muted" style=${{ maxWidth:"256px", marginBottom:"36px" }}>
-        Enter the code on your name tag<br/>to cast your vote tonight
+      <p class="muted" style=${{ maxWidth:"256px", marginBottom:"28px" }}>
+        Digite o código do seu crachá<br/>para votar esta noite
       </p>
       <form onSubmit=${submit} style=${{ width:"100%", maxWidth:"320px" }}>
-        <input class="email-input" type="text" placeholder="Your code (e.g. X7K2)"
+        <input class="email-input" type="text" placeholder="Seu código (ex. X7K2)"
           value=${code} maxLength="4" autocomplete="off" autocapitalize="characters"
           style=${{ textTransform:"uppercase", letterSpacing:"6px", textAlign:"center", fontSize:"22px" }}
           onInput=${e => setCode(e.target.value.toUpperCase())} required/>
         <div class="err-msg">${error}</div>
         <button class="btn-grad" type="submit" disabled=${loading}
           style=${{ width:"100%", marginTop:"4px", padding:"18px", borderRadius:"14px" }}>
-          ${loading ? "Entering…" : "Enter The Vote ✦"}
+          ${loading ? "Entrando…" : "Entrar na Votação ✦"}
         </button>
       </form>
-      <div class="qr-wrap">
-        <div class="qr-hint">Scan to open on your phone</div>
-        <img src=${qrUrl} alt="QR" width="120" height="120"
-             style=${{ borderRadius:"8px", background:"#fff", padding:"6px", display:"block", margin:"0 auto" }}/>
-      </div>
       <div class="stats-row">
-        <div class="stat"><div class="stat-num">2</div><div class="stat-label">Categories</div></div>
+        <div class="stat"><div class="stat-num">2</div><div class="stat-label">Categorias</div></div>
         <div class="stat-divider"></div>
-        <div class="stat"><div class="stat-num">3</div><div class="stat-label">Picks Each</div></div>
+        <div class="stat"><div class="stat-num">3</div><div class="stat-label">Votos Cada</div></div>
       </div>
     </div>
   `;
@@ -254,67 +241,67 @@ function CategoriesPage({ categories, localVotes, onSelectCategory, onReview }) 
   });
   const namesPreview = arr => arr.length ? arr.map(c => c.name.split(' ')[0]).join(' · ') : null;
 
-  const stepLabel = !sDone ? 'Step 1 of 2' : !cDone ? 'Step 2 of 2' : 'All done ✓';
+  const stepLabel = !sDone ? 'Passo 1 de 2' : !cDone ? 'Passo 2 de 2' : 'Concluído ✓';
 
   return html`
     <div class="screen-flow">
       <div class="cat-header">
         <div class="cat-header-label">${stepLabel}</div>
-        <h2 class="display-h2">Cast Your Vote</h2>
-        <p style=${{ color:"rgba(248,244,255,0.38)", fontSize:"14px", marginTop:"7px" }}>Pick your top 3 in each category</p>
+        <h2 class="display-h2">Vote Agora</h2>
+        <p style=${{ color:"rgba(248,244,255,0.38)", fontSize:"14px", marginTop:"7px" }}>Escolha seus 3 favoritos em cada categoria</p>
       </div>
 
-      <!-- Singing -->
+      <!-- Canto -->
       <div onClick=${() => onSelectCategory("singing")} style=${cardStyle(sDone,"168,85,247")}>
         <div style=${{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"14px" }}>
           <div class="cat-card-icon" style=${{ background:"rgba(168,85,247,0.14)", border:"1px solid rgba(168,85,247,0.22)" }}>🎤</div>
           <div style=${{ flex:1, minWidth:0 }}>
-            <div class="cat-card-title">Singing Performance</div>
-            <div class="cat-card-sub">${categories.singing.length} performers</div>
+            <div class="cat-card-title">Melhor Canto</div>
+            <div class="cat-card-sub">${categories.singing.length} participantes</div>
           </div>
           <div style=${badgeStyle(sDone, sCount, "168,85,247")}>
-            ${sDone ? "DONE ✓" : sCount > 0 ? `${sCount}/3` : ""}
+            ${sDone ? "PRONTO ✓" : sCount > 0 ? `${sCount}/3` : ""}
           </div>
         </div>
         <div class="cat-prog-track"><div style=${barStyle(sCount,"168,85,247")}></div></div>
         <div class="cat-prog-info">
-          <span>${sCount} of 3 selected</span>
-          <span>${namesPreview(localVotes.singing) || "Tap to vote →"}</span>
+          <span>${sCount} de 3 selecionados</span>
+          <span>${namesPreview(localVotes.singing) || "Toque para votar →"}</span>
         </div>
       </div>
 
-      <div style=${{ height:"14px" }}></div>
+      <div style=${{ height:"12px" }}></div>
 
-      <!-- Costume -->
+      <!-- Fantasia -->
       <div onClick=${() => onSelectCategory("costume")} style=${cardStyle(cDone,"236,72,153")}>
         <div style=${{ display:"flex", alignItems:"center", gap:"14px", marginBottom:"14px" }}>
           <div class="cat-card-icon" style=${{ background:"rgba(236,72,153,0.14)", border:"1px solid rgba(236,72,153,0.22)" }}>👑</div>
           <div style=${{ flex:1, minWidth:0 }}>
-            <div class="cat-card-title">Best Costume</div>
-            <div class="cat-card-sub">${categories.costume.length} contestants</div>
+            <div class="cat-card-title">Melhor Fantasia</div>
+            <div class="cat-card-sub">${categories.costume.length} participantes</div>
           </div>
           <div style=${badgeStyle(cDone, cCount, "236,72,153")}>
-            ${cDone ? "DONE ✓" : cCount > 0 ? `${cCount}/3` : ""}
+            ${cDone ? "PRONTO ✓" : cCount > 0 ? `${cCount}/3` : ""}
           </div>
         </div>
         <div class="cat-prog-track"><div style=${barStyle(cCount,"236,72,153")}></div></div>
         <div class="cat-prog-info">
-          <span>${cCount} of 3 selected</span>
-          <span>${namesPreview(localVotes.costume) || "Tap to vote →"}</span>
+          <span>${cCount} de 3 selecionados</span>
+          <span>${namesPreview(localVotes.costume) || "Toque para votar →"}</span>
         </div>
       </div>
 
-      <div style=${{ flex:1, minHeight:"36px" }}></div>
+      <div style=${{ flex:1, minHeight:"20px" }}></div>
 
       ${both ? html`
         <div style=${{ animation:"fadeUp 0.4s ease both" }}>
           <div class="cat-divider"></div>
-          <button class="btn-grad-full" onClick=${onReview}>Review &amp; Submit →</button>
+          <button class="btn-grad-full" onClick=${onReview}>Revisar e Enviar →</button>
         </div>
       ` : html`
         <div>
           <div class="cat-divider"></div>
-          <div class="cat-hint">Complete both categories to submit</div>
+          <div class="cat-hint">Complete as duas categorias para enviar</div>
         </div>
       `}
     </div>
@@ -337,8 +324,8 @@ function VotingPage({ category, contestants, picks, onSave, onBack }) {
 
   const filtered = contestants.filter(c => !search || c.name.toLowerCase().includes(search.toLowerCase()));
   const ready = selected.length === 3;
-  const catTitle = category === "singing" ? "Singing Performance" : "Best Costume";
-  const catLabel = category === "singing" ? "Category 1 of 2" : "Category 2 of 2";
+  const catTitle = category === "singing" ? "Melhor Canto" : "Melhor Fantasia";
+  const catLabel = category === "singing" ? "Categoria 1 de 2" : "Categoria 2 de 2";
 
   const slotStyle = (i, rgb) => ({
     flex:1, minWidth:0, padding:"8px 10px", borderRadius:"10px",
@@ -385,7 +372,7 @@ function VotingPage({ category, contestants, picks, onSave, onBack }) {
 
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input class="search-input" type="text" placeholder="Search contestants…"
+        <input class="search-input" type="text" placeholder="Buscar participantes…"
           value=${search} onInput=${e => setSearch(e.target.value)}/>
       </div>
 
@@ -426,7 +413,7 @@ function VotingPage({ category, contestants, picks, onSave, onBack }) {
 
       <div class="vote-footer">
         <button style=${doneStyle} onClick=${() => ready && onSave(selected)}>
-          ${ready ? "Save Picks ✦" : `Pick ${3 - selected.length} more to continue`}
+          ${ready ? "Salvar Escolhas ✦" : `Escolha mais ${3 - selected.length} para continuar`}
         </button>
       </div>
     </div>
@@ -437,17 +424,17 @@ function VotingPage({ category, contestants, picks, onSave, onBack }) {
 function ReviewPage({ localVotes, onSubmit, onBack, submitting, error }) {
   const makePicks = arr => arr.map((c, i) => ({ ...c, i }));
   return html`
-    <div class="screen-flow" style=${{ paddingTop:"58px", paddingBottom:"52px" }}>
-      <div style=${{ textAlign:"center", marginBottom:"42px" }}>
-        <div class="gold-label" style=${{ marginBottom:"9px" }}>Final Review</div>
-        <h2 class="display-h2">Your Picks</h2>
-        <p style=${{ color:"rgba(248,244,255,0.38)", fontSize:"14px", marginTop:"7px" }}>Confirm before submitting</p>
+    <div class="screen-flow" style=${{ paddingTop:"48px", paddingBottom:"36px" }}>
+      <div style=${{ textAlign:"center", marginBottom:"28px" }}>
+        <div class="gold-label" style=${{ marginBottom:"9px" }}>Revisão Final</div>
+        <h2 class="display-h2">Suas Escolhas</h2>
+        <p style=${{ color:"rgba(248,244,255,0.38)", fontSize:"14px", marginTop:"7px" }}>Confirme antes de enviar</p>
       </div>
 
-      <div style=${{ marginBottom:"32px" }}>
+      <div style=${{ marginBottom:"24px" }}>
         <div class="review-section-label">
           <span style=${{ fontSize:"17px" }}>🎤</span>
-          <span class="review-section-text" style=${{ color:"rgba(168,85,247,0.9)" }}>Singing Performance</span>
+          <span class="review-section-text" style=${{ color:"rgba(168,85,247,0.9)" }}>Melhor Canto</span>
         </div>
         ${makePicks(localVotes.singing).map(c => html`
           <div key=${c.id} style=${{ display:"flex", alignItems:"center", gap:"14px",
@@ -461,10 +448,10 @@ function ReviewPage({ localVotes, onSubmit, onBack, submitting, error }) {
 
       <div class="review-divider"></div>
 
-      <div style=${{ marginBottom:"40px" }}>
+      <div style=${{ marginBottom:"28px" }}>
         <div class="review-section-label">
           <span style=${{ fontSize:"17px" }}>👑</span>
-          <span class="review-section-text" style=${{ color:"rgba(236,72,153,0.9)" }}>Best Costume</span>
+          <span class="review-section-text" style=${{ color:"rgba(236,72,153,0.9)" }}>Melhor Fantasia</span>
         </div>
         ${makePicks(localVotes.costume).map(c => html`
           <div key=${c.id} style=${{ display:"flex", alignItems:"center", gap:"14px",
@@ -479,10 +466,10 @@ function ReviewPage({ localVotes, onSubmit, onBack, submitting, error }) {
       ${error && html`<div style=${{ color:"#f87171", fontSize:"14px", textAlign:"center", marginBottom:"12px" }}>${error}</div>`}
 
       <div class="review-actions">
-        <button class="btn-ghost" onClick=${onBack}>← Edit Votes</button>
+        <button class="btn-ghost" onClick=${onBack}>← Editar Votos</button>
         <button class="btn-grad-full" onClick=${onSubmit} disabled=${submitting}
           style=${{ borderRadius:"14px" }}>
-          ${submitting ? "Submitting…" : "Submit My Vote ✦"}
+          ${submitting ? "Enviando…" : "Enviar Meu Voto ✦"}
         </button>
       </div>
     </div>
@@ -496,26 +483,26 @@ function DonePage({ localVotes }) {
       <div class="curtain-l"></div>
       <div class="curtain-r"></div>
       <${Stars}/>
-      <div class="float-icon" style=${{ fontSize:"58px", marginBottom:"26px" }}>🏆</div>
-      <div class="gold-label">Vote Submitted!</div>
-      <h2 class="display-h2-lg" style=${{ marginBottom:"14px" }}>Thank<br/>You!</h2>
+      <div class="float-icon" style=${{ fontSize:"52px", marginBottom:"20px" }}>🏆</div>
+      <div class="gold-label">Voto Enviado!</div>
+      <h2 class="display-h2-lg" style=${{ marginBottom:"12px" }}>Obrigado!</h2>
       <div class="divider-bar"></div>
-      <p class="muted" style=${{ maxWidth:"272px", marginBottom:"48px" }}>
-        Results will be revealed later tonight —<br/>stay close for the big announcement!
+      <p class="muted" style=${{ maxWidth:"272px", marginBottom:"32px" }}>
+        Os resultados serão revelados em breve —<br/>fique por perto para o grande anúncio!
       </p>
       ${localVotes && html`
         <div class="done-summary">
-          <div class="done-summary-label">Your selections</div>
+          <div class="done-summary-label">Suas escolhas</div>
           <div style=${{ display:"flex", gap:"16px" }}>
             <div class="done-col">
-              <div class="done-col-label" style=${{ color:"rgba(168,85,247,0.88)" }}>🎤 Singing</div>
+              <div class="done-col-label" style=${{ color:"rgba(168,85,247,0.88)" }}>🎤 Canto</div>
               ${localVotes.singing.map((c,i) => html`
                 <div key=${c.id} class="done-col-item">${i+1}. ${c.name}</div>
               `)}
             </div>
             <div class="done-col-divider"></div>
             <div class="done-col">
-              <div class="done-col-label" style=${{ color:"rgba(236,72,153,0.88)" }}>👑 Costume</div>
+              <div class="done-col-label" style=${{ color:"rgba(236,72,153,0.88)" }}>👑 Fantasia</div>
               ${localVotes.costume.map((c,i) => html`
                 <div key=${c.id} class="done-col-item">${i+1}. ${c.name}</div>
               `)}
@@ -533,17 +520,17 @@ function ResultsPage() {
   useEffect(() => { api("/api/results").then(setData).catch(() => {}); }, []);
   if (!data) return html`<div class="screen-center"><${Spinner}/></div>`;
   return html`
-    <div class="screen-flow" style=${{ paddingTop:"58px" }}>
+    <div class="screen-flow" style=${{ overflowY:"auto", paddingTop:"48px" }}>
       <div style=${{ textAlign:"center", marginBottom:"40px" }}>
-        <div class="gold-label">Tonight's Results</div>
-        <h2 class="display-h2">The Winners</h2>
+        <div class="gold-label">Resultados da Noite</div>
+        <h2 class="display-h2">Os Vencedores</h2>
       </div>
       ${Object.entries(data.results).map(([cat, rows]) => html`
         <div key=${cat} style=${{ marginBottom:"32px" }}>
           <div class="review-section-label">
             <span style=${{ fontSize:"17px" }}>${cat==="singing"?"🎤":"👑"}</span>
             <span class="review-section-text" style=${{ color: cat==="singing"?"rgba(168,85,247,0.9)":"rgba(236,72,153,0.9)" }}>
-              ${cat==="singing"?"Singing Performance":"Best Costume"}
+              ${cat==="singing"?"Melhor Canto":"Melhor Fantasia"}
             </span>
           </div>
           ${rows.map((r,i) => html`

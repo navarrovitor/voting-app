@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Admin — Party Vote</title>
+<title>Admin — Votação da Festa</title>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
@@ -28,6 +28,8 @@ input:focus{border-color:#7c3aed}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn-outline{background:transparent;border:1px solid #475569;color:#94a3b8}
 .btn-outline:hover{border-color:#7c3aed;color:#7c3aed}
+.btn-export{background:#0f766e;color:#fff}
+.btn-export:hover{background:#0d9488}
 .btn:disabled{opacity:0.45;cursor:not-allowed}
 .row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .row:last-child{margin-bottom:0}
@@ -38,7 +40,6 @@ input:focus{border-color:#7c3aed}
 .btn-present:hover{background:#0d9488}
 .btn-absent{background:transparent;border:1px solid #475569;color:#64748b}
 .btn-absent:hover{border-color:#0f766e;color:#0d9488}
-.add-code{width:90px;flex:none}
 .status-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .status-label{font-size:14px;flex:1}
 .big-status{font-size:28px;font-weight:800}
@@ -60,6 +61,10 @@ input:focus{border-color:#7c3aed}
 .tab{flex:1;padding:10px;border-radius:8px;border:1px solid #334155;background:transparent;color:#64748b;font-weight:600;cursor:pointer;font-size:13px}
 .tab.active{border-color:#7c3aed;background:rgba(124,58,237,0.15);color:#a78bfa}
 .divider{border:none;border-top:1px solid #334155;margin:14px 0}
+.qr-section{display:flex;align-items:center;gap:16px;padding:16px;background:#0f172a;border-radius:10px;margin-bottom:16px}
+.qr-section img{border-radius:6px;background:#fff;padding:4px;flex-shrink:0}
+.qr-info{flex:1;min-width:0}
+.qr-url{font-size:12px;color:#64748b;word-break:break-all;margin-top:4px}
 </style>
 </head>
 <body>
@@ -75,11 +80,21 @@ function api(path, opts = {}) {
     ...opts,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   }).then(async r => {
-    if (r.status === 204) { if (!r.ok) throw new Error("Failed"); return null; }
+    if (r.status === 204) { if (!r.ok) throw new Error("Falhou"); return null; }
     const data = await r.json();
-    if (!r.ok) throw new Error(data.error || "Failed");
+    if (!r.ok) throw new Error(data.error || "Falhou");
     return data;
   });
+}
+
+function exportCSV(contestants) {
+  const rows = [["Nome", "Código"], ...contestants.map(c => [c.name, c.code || ""])];
+  const csv = rows.map(r => r.map(v => `"${v.replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "participantes.csv"; a.click();
+  URL.revokeObjectURL(url);
 }
 
 function LoginPage({ onLogin }) {
@@ -94,20 +109,20 @@ function LoginPage({ onLogin }) {
       const data = await api("/admin/login", { method: "POST", body: { password: pw } });
       localStorage.setItem("admin_token", data.token);
       onLogin();
-    } catch { setError("Wrong password"); }
+    } catch { setError("Senha incorreta"); }
     finally { setLoading(false); }
   }
 
   return html`
     <div class="app">
-      <h1>🔐 Admin Login</h1>
+      <h1>🔐 Login Administrador</h1>
       <div class="card">
         <form onSubmit=${submit}>
-          <input type="password" placeholder="Admin password" value=${pw}
+          <input type="password" placeholder="Senha de administrador" value=${pw}
             onInput=${e => setPw(e.target.value)} autoFocus/>
           ${error && html`<div class="error">${error}</div>`}
           <button class="btn btn-primary" style=${{ marginTop:"12px", width:"100%" }} disabled=${loading}>
-            ${loading ? "..." : "Login"}
+            ${loading ? "..." : "Entrar"}
           </button>
         </form>
       </div>
@@ -124,6 +139,9 @@ function Dashboard() {
   const [newCode, setNewCode] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const appUrl = window.location.origin + "/";
+  const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" + encodeURIComponent(appUrl);
 
   async function load() {
     const [cs, st] = await Promise.all([api("/admin/contestants"), api("/admin/settings")]);
@@ -151,7 +169,7 @@ function Dashboard() {
   }
 
   async function deleteContestant(id) {
-    if (!confirm("Delete this contestant?")) return;
+    if (!confirm("Excluir este participante?")) return;
     await api(`/admin/contestants/${id}`, { method: "DELETE" });
     setContestants(prev => prev.filter(x => x.id !== id));
   }
@@ -159,59 +177,75 @@ function Dashboard() {
   async function updateSetting(key, value) {
     await api("/admin/settings", { method: "POST", body: { [key]: value } });
     setSettings(prev => ({ ...prev, [key]: value }));
-    setMsg("✓ Saved"); setTimeout(() => setMsg(""), 2000);
+    setMsg("✓ Salvo"); setTimeout(() => setMsg(""), 2000);
   }
 
   const medals = ["🥇","🥈","🥉"];
+  const tabs = [["contestants","Participantes"],["voting","Votação"],["results","Resultados"]];
 
   if (loading) return html`<div class="app"><div class="spinner"></div></div>`;
 
   return html`
     <div class="app">
-      <h1>🎉 Party Admin</h1>
+      <h1>🎉 Admin da Festa</h1>
       <div class="tabs">
-        ${["contestants","voting","results"].map(t => html`
+        ${tabs.map(([t, label]) => html`
           <button key=${t} class=${"tab"+(tab===t?" active":"")} onClick=${() => setTab(t)}>
-            ${t.charAt(0).toUpperCase()+t.slice(1)}
+            ${label}
           </button>
         `)}
       </div>
 
       ${tab === "contestants" && html`
-        <div class="card">
-          <h2>Contestants</h2>
-          <h3>Roster — toggle present at party + categories</h3>
-          ${contestants.map(c => html`
-            <div key=${c.id} class="row">
-              <span class="ccode">${c.code||"—"}</span>
-              <span class="cname">${c.name}</span>
-              <div class="tgrp">
-                <button class=${"btn btn-sm "+(c.present?"btn-present":"btn-absent")}
-                  onClick=${() => toggleField(c.id, "present")} title="Present at party">
-                  ${c.present?"✓ Here":"Absent"}
+        <div>
+          <div class="qr-section">
+            <img src=${qrUrl} alt="QR" width="100" height="100"/>
+            <div class="qr-info">
+              <div style=${{ fontSize:"13px", fontWeight:"700", color:"#e2e8f0" }}>QR Code da Votação</div>
+              <div class="qr-url">${appUrl}</div>
+              <div style=${{ marginTop:"8px", display:"flex", gap:"8px", flexWrap:"wrap" }}>
+                <button class="btn btn-sm btn-export" onClick=${() => exportCSV(contestants)}>
+                  ↓ Exportar Lista
                 </button>
-                <button class=${"btn btn-sm "+(c.singing_enabled?"btn-success":"btn-outline")}
-                  onClick=${() => toggleField(c.id, "singing_enabled")}>🎤</button>
-                <button class=${"btn btn-sm "+(c.costume_enabled?"btn-success":"btn-outline")}
-                  onClick=${() => toggleField(c.id, "costume_enabled")}>👗</button>
-                <button class="btn btn-sm btn-danger" onClick=${() => deleteContestant(c.id)}>✕</button>
               </div>
             </div>
-          `)}
-          <hr class="divider"/>
-          <h3>Add Contestant</h3>
-          <div class="add-form">
-            <input type="text" placeholder="Name" value=${newName}
-              onInput=${e => setNewName(e.target.value)}
-              onKeyDown=${e => e.key==="Enter" && addContestant()}/>
-            <input class="add-code" type="text" placeholder="Code (auto)" value=${newCode}
-              maxLength="4"
-              onInput=${e => setNewCode(e.target.value.toUpperCase())}
-              onKeyDown=${e => e.key==="Enter" && addContestant()}/>
-            <button class="btn btn-primary" onClick=${addContestant}>Add</button>
           </div>
-          <div class="error" style=${{ fontSize:"11px", color:"#94a3b8", marginTop:"6px" }}>
-            Leave code blank to auto-generate a 4-character code.
+
+          <div class="card">
+            <h2>Participantes</h2>
+            <h3>Lista — marque presença e categorias</h3>
+            ${contestants.map(c => html`
+              <div key=${c.id} class="row">
+                <span class="ccode">${c.code||"—"}</span>
+                <span class="cname">${c.name}</span>
+                <div class="tgrp">
+                  <button class=${"btn btn-sm "+(c.present?"btn-present":"btn-absent")}
+                    onClick=${() => toggleField(c.id, "present")} title="Presente na festa">
+                    ${c.present?"✓ Presente":"Ausente"}
+                  </button>
+                  <button class=${"btn btn-sm "+(c.singing_enabled?"btn-success":"btn-outline")}
+                    onClick=${() => toggleField(c.id, "singing_enabled")}>🎤</button>
+                  <button class=${"btn btn-sm "+(c.costume_enabled?"btn-success":"btn-outline")}
+                    onClick=${() => toggleField(c.id, "costume_enabled")}>👗</button>
+                  <button class="btn btn-sm btn-danger" onClick=${() => deleteContestant(c.id)}>✕</button>
+                </div>
+              </div>
+            `)}
+            <hr class="divider"/>
+            <h3>Adicionar Participante</h3>
+            <div class="add-form">
+              <input type="text" placeholder="Nome" value=${newName}
+                onInput=${e => setNewName(e.target.value)}
+                onKeyDown=${e => e.key==="Enter" && addContestant()}/>
+              <input class="add-code" type="text" placeholder="Código (auto)" value=${newCode}
+                maxLength="4"
+                onInput=${e => setNewCode(e.target.value.toUpperCase())}
+                onKeyDown=${e => e.key==="Enter" && addContestant()}/>
+              <button class="btn btn-primary" onClick=${addContestant}>Adicionar</button>
+            </div>
+            <div style=${{ fontSize:"11px", color:"#94a3b8", marginTop:"6px" }}>
+              Deixe o código em branco para gerar automaticamente.
+            </div>
           </div>
         </div>
       `}
@@ -219,33 +253,33 @@ function Dashboard() {
       ${tab === "voting" && html`
         <div>
           <div class="card">
-            <h2>Voting Status</h2>
+            <h2>Status da Votação</h2>
             <div class="status-row">
               <span class="status-label">Status:</span>
               <span class=${"big-status "+(settings.voting_open?"open":"closed")}>
-                ${settings.voting_open ? "OPEN" : "CLOSED"}
+                ${settings.voting_open ? "ABERTA" : "FECHADA"}
               </span>
             </div>
             <div style=${{ display:"flex", gap:"8px" }}>
               <button class="btn btn-success" disabled=${settings.voting_open}
-                onClick=${() => updateSetting("voting_open", true)}>Open Voting</button>
+                onClick=${() => updateSetting("voting_open", true)}>Abrir Votação</button>
               <button class="btn btn-danger" disabled=${!settings.voting_open}
-                onClick=${() => updateSetting("voting_open", false)}>Close Voting</button>
+                onClick=${() => updateSetting("voting_open", false)}>Fechar Votação</button>
             </div>
           </div>
           <div class="card">
-            <h2>Results Visibility</h2>
+            <h2>Visibilidade dos Resultados</h2>
             <div class="status-row">
-              <span class="status-label">Results public:</span>
+              <span class="status-label">Resultados públicos:</span>
               <span class=${"big-status "+(settings.results_public?"open":"closed")}>
-                ${settings.results_public ? "YES" : "NO"}
+                ${settings.results_public ? "SIM" : "NÃO"}
               </span>
             </div>
             <div style=${{ display:"flex", gap:"8px" }}>
               <button class="btn btn-success" disabled=${settings.results_public}
-                onClick=${() => updateSetting("results_public", true)}>Show Results</button>
+                onClick=${() => updateSetting("results_public", true)}>Mostrar Resultados</button>
               <button class="btn btn-danger" disabled=${!settings.results_public}
-                onClick=${() => updateSetting("results_public", false)}>Hide Results</button>
+                onClick=${() => updateSetting("results_public", false)}>Ocultar Resultados</button>
             </div>
             ${msg && html`<div class="ok">${msg}</div>`}
           </div>
@@ -256,23 +290,23 @@ function Dashboard() {
         <div>
           <div class="card">
             <div style=${{ display:"flex", gap:"16px", fontSize:"14px", color:"#94a3b8" }}>
-              <span>Total voters: <strong style=${{ color:"#e2e8f0" }}>${results.total_voters}</strong></span>
-              <span>Voting: <strong style=${{ color: results.voting_open?"#34d399":"#f87171" }}>
-                ${results.voting_open?"Open":"Closed"}
+              <span>Total de votantes: <strong style=${{ color:"#e2e8f0" }}>${results.total_voters}</strong></span>
+              <span>Votação: <strong style=${{ color: results.voting_open?"#34d399":"#f87171" }}>
+                ${results.voting_open?"Aberta":"Fechada"}
               </strong></span>
             </div>
           </div>
           ${Object.entries(results.results).map(([cat, rows]) => html`
             <div key=${cat} class="card">
-              <h2>${cat==="singing"?"🎤 Best Singing Performance":"👗 Best Costume"}</h2>
+              <h2>${cat==="singing"?"🎤 Melhor Canto":"👗 Melhor Fantasia"}</h2>
               ${rows.length === 0
-                ? html`<p style=${{ color:"#64748b", fontSize:"14px" }}>No votes yet</p>`
+                ? html`<p style=${{ color:"#64748b", fontSize:"14px" }}>Sem votos ainda</p>`
                 : rows.map((r, i) => html`
                     <div key=${r.id} class="result-row">
                       <span class="result-rank">${medals[i]||(i+1)+"."}</span>
                       <span class="result-name">${r.name}</span>
                       <span class="result-pts">${r.points} pts</span>
-                      <span class="result-votes">${r.votes} votes</span>
+                      <span class="result-votes">${r.votes} votos</span>
                     </div>
                   `)
               }
@@ -283,7 +317,7 @@ function Dashboard() {
 
       <button class="btn btn-outline" style=${{ marginTop:"8px" }}
         onClick=${() => { localStorage.removeItem("admin_token"); window.location.reload(); }}>
-        Logout
+        Sair
       </button>
     </div>
   `;
